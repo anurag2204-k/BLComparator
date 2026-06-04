@@ -1,0 +1,59 @@
+{
+  "results": [
+    {
+      "fields": {
+        "displayid": "145378331485",
+        "isbigbuyer": "0",
+        "gstverificationstatus": "1",
+        "purchase_status": "OPEN",
+        "score": 7.237229e11,
+        "mcat_name": ["TMT Steel Bars", "TMT Bars"],
+        "city": "Davanagere",
+        "city_string": "Davanagere",
+        "district_string": "Davanagere",
+        "countryname": "India",
+        "countryiso": "IN",
+        "title": "SRI Durga TMT 8mm Mild Steel TMT Bar",
+        "title_tp": "imsws SRI Durga TMT 8mm Mild Steel TMT Bar imswe",
+        "lastactiondate": "2026-06-03T19:25:17Z",
+        "isqdetails": [
+          "Quantity:10 Tonne",
+          "Diameter:8 mm",
+          "Grade:Fe 550D",
+          "Probable Order Value:Rs. 5.4 - 6.2 Lakh",
+          "Probable Requirement Type:Business Use"
+        ],
+        "cat_name": ["Steel & Stainless Steel Bars, Rods, Plates and Sheets"]
+      }
+    },
+    {
+      "fields": {
+        "displayid": "145320057463",
+        "isbigbuyer": "0",
+        "gstverificationstatus": "0",
+        "purchase_status": "OPEN",
+        "score": 6.6443824e11,
+        "mcat_name": ["Kamdhenu TMT Bars"],
+        "city": "Bengaluru",
+        "city_string": "Bengaluru",
+        "district_string": "Bengaluru",
+        "countryname": "India",
+        "countryiso": "IN",
+        "title": "10mm Meenakshi TMT Bar",
+        "title_tp": "imsws 10mm Meenakshi TMT Bar imswe",
+        "description": "Buyer Searched for 500tmt stell",
+        "lastactiondate": "2026-06-02T18:51:07Z",
+        "isqdetails": [
+          "Quantity:1.5 Tonne",
+          "Diameter:10 mm",
+          "Grade:Fe 550D",
+          "Brand:Kamdhenu",
+          "Buyer Filled Details:12 mm, 16 mm, Near bidadi byramangala",
+          "Probable Order Value:Rs. 57,000 - 58,000",
+          "Probable Requirement Type:Business Use"
+        ],
+        "cat_name": ["Steel & Stainless Steel Bars, Rods, Plates and Sheets"]
+      }
+    }
+  ]
+}

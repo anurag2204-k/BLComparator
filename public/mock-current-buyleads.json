@@ -1,0 +1,45 @@
+{
+  "results": [
+    {
+      "fields": {
+        "displayid": "738006191164",
+        "city": "Manendragarh",
+        "grid": 111332,
+        "lastactiondate": "1970-01-01T00:00:00Z",
+        "score": 1000005,
+        "title": "Supply of Excavtion work , Shuttering work , Mixcher Machine , TMT Bar 12mm , TMT Bar 10mm , TMT Bar 8mm , Stone 20mm , Stone 40mm , Sand , muroom , Boulder transport 5km , Ordinary Portland Cement (V3) Confirming to IS 269 (Q3) at Manendragarh, Chhattisgarh",
+        "titlex": "imsws Supply of Excavtion work , Shuttering work , Mixcher Machine , TMT Bar 12mm , TMT Bar 10mm , TMT Bar 8mm , Stone 20mm , Stone 40mm , Sand , muroom , Boulder transport 5km , Ordinary Portland Cement (V3) Confirming to IS 269 (Q3) at Manendragarh, Chhattisgarh imswe"
+      }
+    },
+    {
+      "fields": {
+        "displayid": "145338419667",
+        "city": "Patna",
+        "district": "Patna",
+        "grid": 131132,
+        "inquirytype": "0",
+        "lastactiondate": "2026-06-03T09:20:11Z",
+        "mcatid": ["184861", "2475"],
+        "primarymcatid": "184861",
+        "score": 1000005,
+        "title": "12 Mm Tata TMT Bars",
+        "titlex": "imsws 12 Mm Tata TMT Bars imswe"
+      }
+    },
+    {
+      "fields": {
+        "displayid": "145330866859",
+        "city": "Chandigarh",
+        "district": "Chandigarh",
+        "grid": 131132,
+        "inquirytype": "0",
+        "lastactiondate": "2026-06-03T09:15:20Z",
+        "mcatid": ["184861", "2475"],
+        "primarymcatid": "184861",
+        "score": 1000005,
+        "title": "TATA TMT Bars",
+        "titlex": "imsws TATA TMT Bars imswe"
+      }
+    }
+  ]
+}
