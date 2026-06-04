@@ -337,3 +337,59 @@ export async function fetchBuyleadComparison(currentUrl: string, newUrl: string)
     newFetchedCount: newResponse.fields.length,
   };
 }
+
+export interface SellerInfo {
+  homecity: string | null;
+  non_retailer: string | null;
+  dlp: string | null;
+  mcats: string[];
+}
+
+export async function fetchSellerInfo(glid: string): Promise<SellerInfo> {
+  const params = new URLSearchParams();
+  // Add multiple 'fl' query parameters
+  const fields = [
+    "city", "mcats", "neg_city", "district", "neg_mcats", "non_retailer",
+    "homecity", "dlp", "keywords", "quantity_pref", "tov", "neg_country",
+    "paid_seller", "country", "city_state", "neg_state", "consuming_city",
+    "state", "catid", "pmcatid"
+  ];
+  fields.forEach(field => params.append("fl", field));
+  params.set("indent", "on");
+  params.set("q", `glusr_usr_id:${glid}`);
+  params.set("wt", "json");
+
+  const url = `/api/seller?${params.toString()}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch seller info: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const doc = data?.response?.docs?.[0] ?? {};
+
+  const getFieldVal = (field: unknown): string | null => {
+    if (Array.isArray(field)) {
+      return field[0] !== undefined && field[0] !== null ? String(field[0]) : null;
+    }
+    return field !== undefined && field !== null ? String(field) : null;
+  };
+
+  const getArrayVal = (field: unknown): string[] => {
+    if (Array.isArray(field)) {
+      return field.map(String);
+    }
+    if (field !== undefined && field !== null) {
+      return [String(field)];
+    }
+    return [];
+  };
+
+  return {
+    homecity: getFieldVal(doc.homecity),
+    non_retailer: getFieldVal(doc.non_retailer),
+    dlp: getFieldVal(doc.dlp),
+    mcats: getArrayVal(doc.mcats),
+  };
+}
+

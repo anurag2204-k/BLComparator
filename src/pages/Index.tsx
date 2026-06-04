@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SearchHeader } from "@/components/SearchHeader";
 import { ResultColumn } from "@/components/ResultColumn";
-import { fetchBuyleadComparison, type Buylead, type FetchLogEntry } from "@/data/mockBuyleads";
+import { fetchBuyleadComparison, fetchSellerInfo, type Buylead, type FetchLogEntry, type SellerInfo } from "@/data/mockBuyleads";
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, Clock3, Search } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -20,9 +20,19 @@ function buildSearchUrl(url: string, query: string, glidValue: string) {
   return nextUrl.toString();
 }
 
+const DLP_MAP: Record<string, string> = {
+  "1": "Global",
+  "2": "All India",
+  "3": "Foreign Only",
+  "4": "Local",
+  "9": "Hyperlocal",
+};
+
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("chloroform");
   const [glid, setGlid] = useState("236");
+  const [sellerInfo, setSellerInfo] = useState<SellerInfo | null>(null);
+  const [sellerLoading, setSellerLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(true);
   const [shownQuery, setShownQuery] = useState("chloroform");
   const [shownGlid, setShownGlid] = useState("236");
@@ -52,9 +62,22 @@ const Index = () => {
 
     const loadComparison = async () => {
       setIsLoading(true);
+      setSellerLoading(true);
       setError(null);
 
       try {
+        let currentSellerInfo: SellerInfo | null = null;
+        try {
+          currentSellerInfo = await fetchSellerInfo(activeGlid);
+        } catch (sellerError) {
+          console.error("Failed to load seller details:", sellerError);
+        }
+
+        if (isActive) {
+          setSellerInfo(currentSellerInfo);
+          setSellerLoading(false);
+        }
+
         const currentUrl = buildSearchUrl(CURRENT_BUYLEAD_URL, activeQuery, activeGlid);
         const newUrl = buildSearchUrl(NEW_BUYLEAD_URL, activeQuery, activeGlid);
         const nextComparison = await fetchBuyleadComparison(currentUrl, newUrl);
@@ -75,6 +98,7 @@ const Index = () => {
       } finally {
         if (isActive) {
           setIsLoading(false);
+          setSellerLoading(false);
         }
       }
     };
@@ -125,12 +149,49 @@ const Index = () => {
             <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
               GLID: {shownGlid}
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
-              SEARCH KEY: {shownQuery}
-            </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
-              Retail/Non Retailer
-            </span>
+            {sellerLoading ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border animate-pulse">
+                DLP: Loading...
+              </span>
+            ) : sellerInfo?.dlp ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
+                DLP : {DLP_MAP[sellerInfo.dlp] ?? "Unknown"} : {sellerInfo.dlp}
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border border-dashed">
+                DLP: —
+              </span>
+            )}
+            {sellerLoading ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border animate-pulse">
+                Non Retailer: Loading...
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
+                Non Retailer: {sellerInfo?.non_retailer ?? "—"}
+              </span>
+            )}
+            {sellerLoading ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border animate-pulse">
+                Home City: Loading...
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
+                Home City: {sellerInfo?.homecity ?? "—"}
+              </span>
+            )}
+            {sellerLoading ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border animate-pulse">
+                MCATs: Loading...
+              </span>
+            ) : (
+              <span 
+                className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border cursor-help"
+                title={sellerInfo?.mcats && sellerInfo.mcats.length > 0 ? sellerInfo.mcats.join(", ") : "No MCATs"}
+              >
+                MCATs: {sellerInfo?.mcats?.length ?? 0}
+              </span>
+            )}
           </div>
         </section>
 

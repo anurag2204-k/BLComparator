@@ -9,6 +9,11 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     proxy: {
+      "/api/seller": {
+        target: "http://blsearch-db.intermesh.net:8985",
+        changeOrigin: true,
+        rewrite: (proxyPath) => proxyPath.replace(/^\/api\/seller/, "/solr/seller/select"),
+      },
       "/api/current-buylead": {
         target: "http://blsearch.indiamart.com:8983",
         changeOrigin: true,
@@ -23,6 +28,11 @@ export default defineConfig(({ mode }) => ({
   },
   preview: {
     proxy: {
+      "/api/seller": {
+        target: "http://blsearch-db.intermesh.net:8985",
+        changeOrigin: true,
+        rewrite: (proxyPath) => proxyPath.replace(/^\/api\/seller/, "/solr/seller/select"),
+      },
       "/api/current-buylead": {
         target: "http://blsearch.indiamart.com:8983",
         changeOrigin: true,
