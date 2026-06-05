@@ -245,6 +245,11 @@ export function BuyleadCard({
           <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border">
             {buylead.datatype}
           </span>
+          {buylead.slabParams ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border">
+              {buylead.slabParams}
+            </span>
+          ) : null}
           <span className="inline-flex items-center gap-1 text-muted-foreground ml-auto">
             <MapPin className="w-3 h-3" />
             {buylead.countryCode ? (

@@ -32,6 +32,7 @@ export interface Buylead {
   datatype: string | null;
   slab : string | null;
   pmcatids: string[];
+  slabParams: string | null;
 }
 
 type RawBuyleadFields = Record<string, unknown>;
@@ -226,6 +227,7 @@ function normalizeBuylead(fields: RawBuyleadFields): Buylead {
     datatype: getString(fields.datatype),
     slab: getDisplayString(fields.slab),
     pmcatids,
+    slabParams: getDisplayString(fields.slabparams)
   };
 }
 
