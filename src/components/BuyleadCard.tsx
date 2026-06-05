@@ -193,11 +193,17 @@ export function BuyleadCard({
             Display ID: {buylead.displayId}
           </span>
           <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
-            Slab: {buylead.mcatConf ?? "—"}
+            Conf: {buylead.mcatConf ?? "—"}
           </span>
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
-            Slab id: {buylead.slabId ?? "—"}
-          </span>
+          {buylead.gridParamater ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
+              Grid Paramater: {buylead.gridParamater ?? "—"}
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
+              Salb No.: {buylead.slab ?? "—"}
+            </span>
+          )}
           <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
             {buylead.timeBucket ?? buylead.timeAgo ?? "—"}
           </span>
@@ -216,11 +222,14 @@ export function BuyleadCard({
             </span>
           ) : (
             <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
-              MCAT Rank: NI
+              MCAT Rank: NE
             </span>
           )}
           <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border">
             {buylead.retailType}
+          </span>
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border">
+            {buylead.datatype}
           </span>
           <span className="inline-flex items-center gap-1 text-muted-foreground ml-auto">
             <MapPin className="w-3 h-3" />

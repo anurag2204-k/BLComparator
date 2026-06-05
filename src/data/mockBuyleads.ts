@@ -11,7 +11,7 @@ export interface Buylead {
   offerId: string | null;
   glid: string | null;
   mcatConf: string | null;
-  slabId: string | null;
+  gridParamater: string | null;
   retailType: "Retail" | "Non Retail";
   title: string | null;
   timeAgo: string | null;
@@ -29,6 +29,9 @@ export interface Buylead {
   score: number | null;
   mcatIds: string[];
   latlon: string | null;
+  datatype: string | null;
+  slab : string | null;
+  pmcatids: string[];
 }
 
 type RawBuyleadFields = Record<string, unknown>;
@@ -187,6 +190,14 @@ function normalizeBuylead(fields: RawBuyleadFields): Buylead {
     mcatIds.push(String(rawMcatIds));
   }
 
+  const pmcatids: string[] = [];
+  const rawPmcatids = fields.pmcatid;
+  if (Array.isArray(rawPmcatids)) {
+    pmcatids.push(...rawPmcatids.map(String));
+  } else if (rawPmcatids !== undefined && rawPmcatids !== null) {
+    pmcatids.push(String(rawPmcatids));
+  }
+
   const latlon = getString(fields.latlon) ?? getString(fields.lat_lon) ?? null;
 
   return {
@@ -195,7 +206,7 @@ function normalizeBuylead(fields: RawBuyleadFields): Buylead {
     offerId: getString(fields.offerId) ?? getString(fields.offerid),
     glid: getString(fields.glid),
     mcatConf: getDisplayString(fields.mcatconf),
-    slabId: getDisplayString(fields.GRID_PARAMETERS),
+    gridParamater: getDisplayString(fields.GRID_PARAMETERS),
     retailType: getRetailType(fields.inquirytype),
     title: getString(fields.title) ?? getString(fields.title_tp) ?? getString(fields.titlex),
     timeAgo,
@@ -213,11 +224,10 @@ function normalizeBuylead(fields: RawBuyleadFields): Buylead {
     score: getNumber(fields.score),
     mcatIds,
     latlon,
+    datatype: getString(fields.datatype),
+    slab: getDisplayString(fields.slab),
+    pmcatids,
   };
-}
-
-function sortByScoreDesc(leads: Buylead[]): Buylead[] {
-  return [...leads].sort((left, right) => (right.score ?? Number.NEGATIVE_INFINITY) - (left.score ?? Number.NEGATIVE_INFINITY));
 }
 
 function getPageSize(url: URL): number {
@@ -323,19 +333,19 @@ export async function fetchBuyleadComparison(currentUrl: string, newUrl: string)
     fetchAllBuyleads(newUrl, "New BL"),
   ]);
 
-  const currentSorted = sortByScoreDesc(currentResponse.fields.map((fields) => normalizeBuylead(fields)));
-  const newSorted = sortByScoreDesc(newResponse.fields.map((fields) => normalizeBuylead(fields)));
+  const currentLeads = currentResponse.fields.map((fields) => normalizeBuylead(fields));
+  const newLeads = newResponse.fields.map((fields) => normalizeBuylead(fields));
 
-  const currentRankByDisplayId = new Map(currentSorted.map((item, index) => [item.displayId, index + 1]));
-  const newRankByDisplayId = new Map(newSorted.map((item, index) => [item.displayId, index + 1]));
+  const currentRankByDisplayId = new Map(currentLeads.map((item, index) => [item.displayId, index + 1]));
+  const newRankByDisplayId = new Map(newLeads.map((item, index) => [item.displayId, index + 1]));
 
-  const blSearch = currentSorted.map((item, index) => ({
+  const blSearch = currentLeads.map((item, index) => ({
     ...item,
     blRank: index + 1,
     semanticRank: newRankByDisplayId.get(item.displayId) ?? null,
   }));
 
-  const semanticSearch = newSorted.map((item, index) => ({
+  const semanticSearch = newLeads.map((item, index) => ({
     ...item,
     blRank: currentRankByDisplayId.get(item.displayId) ?? null,
     semanticRank: index + 1,
