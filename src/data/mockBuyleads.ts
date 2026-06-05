@@ -27,6 +27,8 @@ export interface Buylead {
   blRank: number | null;
   semanticRank: number | null;
   score: number | null;
+  mcatIds: string[];
+  latlon: string | null;
 }
 
 type RawBuyleadFields = Record<string, unknown>;
@@ -177,6 +179,16 @@ function normalizeBuylead(fields: RawBuyleadFields): Buylead {
   const details = parseDetails(getStringArray(fields.isqdetails));
   const timeAgo = formatTimeAgo(fields);
 
+  const mcatIds: string[] = [];
+  const rawMcatIds = fields.mcatid ?? fields.mcat_id ?? fields.primarymcatid;
+  if (Array.isArray(rawMcatIds)) {
+    mcatIds.push(...rawMcatIds.map(String));
+  } else if (rawMcatIds !== undefined && rawMcatIds !== null) {
+    mcatIds.push(String(rawMcatIds));
+  }
+
+  const latlon = getString(fields.latlon) ?? getString(fields.lat_lon) ?? null;
+
   return {
     id: displayId,
     displayId,
@@ -199,6 +211,8 @@ function normalizeBuylead(fields: RawBuyleadFields): Buylead {
     blRank: null,
     semanticRank: null,
     score: getNumber(fields.score),
+    mcatIds,
+    latlon,
   };
 }
 
@@ -343,6 +357,7 @@ export interface SellerInfo {
   non_retailer: string | null;
   dlp: string | null;
   mcats: string[];
+  country: string | null;
 }
 
 export async function fetchSellerInfo(glid: string): Promise<SellerInfo> {
@@ -390,6 +405,7 @@ export async function fetchSellerInfo(glid: string): Promise<SellerInfo> {
     non_retailer: getFieldVal(doc.non_retailer),
     dlp: getFieldVal(doc.dlp),
     mcats: getArrayVal(doc.mcats),
+    country: getFieldVal(doc.country),
   };
 }
 

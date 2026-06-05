@@ -1,12 +1,79 @@
 import { Clock, MapPin, ChevronRight, Package, IndianRupee, AlertCircle } from "lucide-react";
-import type { Buylead } from "@/data/mockBuyleads";
+import type { Buylead, SellerInfo } from "@/data/mockBuyleads";
+import type { CityLocation } from "@/pages/Index";
 
 interface BuyleadCardProps {
   buylead: Buylead;
   animationDelay?: number;
+  sellerInfo: SellerInfo | null;
+  mcatRankMap: Map<string, string>;
+  cityMap: Map<string, CityLocation>;
 }
 
-export function BuyleadCard({ buylead, animationDelay = 0 }: BuyleadCardProps) {
+const COUNTRY_DEFAULTS: Record<string, { lat: number; lon: number }> = {
+  "india": { lat: 28.704059, lon: 77.102490 }, // Delhi
+  "in": { lat: 28.704059, lon: 77.102490 },
+  "united states of america": { lat: 38.907192, lon: -77.036871 }, // Washington DC
+  "us": { lat: 38.907192, lon: -77.036871 },
+  "united states": { lat: 38.907192, lon: -77.036871 },
+  "default": { lat: 28.704059, lon: 77.102490 } // Default to India
+};
+
+function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function getCoordinates(
+  latlonStr: string | null,
+  cityName: string | null,
+  countryCode: string | null,
+  cityMap: Map<string, CityLocation>
+): { lat: number; lon: number } | null {
+  if (latlonStr) {
+    const parts = latlonStr.split(",");
+    if (parts.length === 2) {
+      const lat = parseFloat(parts[0]);
+      const lon = parseFloat(parts[1]);
+      if (!isNaN(lat) && !isNaN(lon)) {
+        return { lat, lon };
+      }
+    }
+  }
+
+  if (cityName) {
+    const loc = cityMap.get(cityName.toLowerCase());
+    if (loc) {
+      return { lat: loc.lat, lon: loc.lon };
+    }
+  }
+
+  if (countryCode) {
+    const code = countryCode.toLowerCase();
+    if (COUNTRY_DEFAULTS[code]) {
+      return COUNTRY_DEFAULTS[code];
+    }
+  }
+
+  return null;
+}
+
+export function BuyleadCard({
+  buylead,
+  animationDelay = 0,
+  sellerInfo,
+  mcatRankMap,
+  cityMap,
+}: BuyleadCardProps) {
   const renderRank = (label: string, rank: number | null, rankClassName: string) => {
     if (rank === null) {
       return (
@@ -24,6 +91,85 @@ export function BuyleadCard({ buylead, animationDelay = 0 }: BuyleadCardProps) {
     );
   };
 
+  const sellerLoc = sellerInfo?.homecity
+    ? cityMap.get(sellerInfo.homecity.toLowerCase())
+    : null;
+
+  const sellerCoords = sellerLoc
+    ? { lat: sellerLoc.lat, lon: sellerLoc.lon }
+    : sellerInfo?.country
+      ? COUNTRY_DEFAULTS[sellerInfo.country.toLowerCase()] ?? COUNTRY_DEFAULTS["default"]
+      : COUNTRY_DEFAULTS["default"];
+
+  const leadCoords = getCoordinates(
+    buylead.latlon,
+    buylead.location,
+    buylead.countryCode,
+    cityMap
+  );
+
+  let distance: number | null = null;
+  if (sellerCoords && leadCoords) {
+    distance = calculateDistanceKm(
+      sellerCoords.lat,
+      sellerCoords.lon,
+      leadCoords.lat,
+      leadCoords.lon
+    );
+  }
+
+  const isLeadInIndia =
+    buylead.countryCode?.toUpperCase() === "IN" ||
+    buylead.countryCode?.toLowerCase() === "india" ||
+    (buylead.location && cityMap.get(buylead.location.toLowerCase())?.country.toLowerCase() === "india");
+
+  let withinDlp = true;
+  let dlpStatusText = "Within DLP";
+
+  if (sellerInfo?.dlp) {
+    const dlpVal = sellerInfo.dlp;
+    if (dlpVal === "1") {
+      withinDlp = true;
+      dlpStatusText = "Within DLP (Global)";
+    } else if (dlpVal === "2") {
+      withinDlp = isLeadInIndia;
+      dlpStatusText = withinDlp ? "Within DLP (All India)" : "Outside DLP (Foreign)";
+    } else if (dlpVal === "3") {
+      withinDlp = !isLeadInIndia;
+      dlpStatusText = withinDlp ? "Within DLP (Foreign)" : "Outside DLP (India)";
+    } else if (dlpVal === "4") {
+      if (distance !== null) {
+        withinDlp = distance <= 250;
+        dlpStatusText = withinDlp
+          ? `Within DLP (${Math.round(distance)} km)`
+          : `Outside DLP (${Math.round(distance)} km)`;
+      } else {
+        withinDlp = true;
+        dlpStatusText = "Within DLP (Local)";
+      }
+    } else if (dlpVal === "9") {
+      if (distance !== null) {
+        withinDlp = distance <= 50;
+        dlpStatusText = withinDlp
+          ? `Within DLP (${Math.round(distance)} km)`
+          : `Outside DLP (${Math.round(distance)} km)`;
+      } else {
+        withinDlp = true;
+        dlpStatusText = "Within DLP (Hyperlocal)";
+      }
+    }
+  }
+
+  let mcatRank: string | null = null;
+  if (buylead.mcatIds && mcatRankMap) {
+    for (const mcatId of buylead.mcatIds) {
+      if (mcatRankMap.has(mcatId)) {
+        mcatRank = mcatRankMap.get(mcatId) || null;
+        break;
+      }
+    }
+  }
+
   return (
     <div
       className="bg-card rounded-md shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-150 border border-border overflow-hidden animate-fade-in flex flex-col"
@@ -37,7 +183,7 @@ export function BuyleadCard({ buylead, animationDelay = 0 }: BuyleadCardProps) {
           </h3>
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground whitespace-nowrap">
             <Clock className="w-3 h-3" />
-            {buylead.timeBucket ?? buylead.timeAgo}
+            {buylead.timeAgo ?? buylead.timeBucket ?? "—"}
           </div>
         </div>
 
@@ -55,10 +201,25 @@ export function BuyleadCard({ buylead, animationDelay = 0 }: BuyleadCardProps) {
           <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
             {buylead.timeBucket ?? buylead.timeAgo ?? "—"}
           </span>
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
-            Within DLP
-          </span>
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
+          {withinDlp ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
+              {dlpStatusText}
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
+              {dlpStatusText}
+            </span>
+          )}
+          {mcatRank ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
+              MCAT Rank: {mcatRank}
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
+              MCAT Rank: NI
+            </span>
+          )}
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border">
             {buylead.retailType}
           </span>
           <span className="inline-flex items-center gap-1 text-muted-foreground ml-auto">

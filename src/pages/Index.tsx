@@ -28,17 +28,73 @@ const DLP_MAP: Record<string, string> = {
   "9": "Hyperlocal",
 };
 
+export interface CityLocation {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+}
+
 const Index = () => {
-  const [searchQuery, setSearchQuery] = useState("chloroform");
-  const [glid, setGlid] = useState("236");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [glid, setGlid] = useState("");
   const [sellerInfo, setSellerInfo] = useState<SellerInfo | null>(null);
   const [sellerLoading, setSellerLoading] = useState(false);
+  const [cityMap, setCityMap] = useState<Map<string, CityLocation>>(new Map());
+
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const response = await fetch("/city.csv");
+        if (!response.ok) {
+          throw new Error("Failed to load cities list");
+        }
+        const text = await response.text();
+        
+        const map = new Map<string, CityLocation>();
+        const lines = text.split(/\r?\n/);
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          
+          const cols: string[] = [];
+          let current = "";
+          let inQuotes = false;
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              cols.push(current);
+              current = "";
+            } else {
+              current += char;
+            }
+          }
+          cols.push(current);
+
+          if (cols.length >= 7) {
+            const name = cols[0].trim();
+            const country = cols[4].trim();
+            const lat = parseFloat(cols[5]);
+            const lon = parseFloat(cols[6]);
+            if (name && !isNaN(lat) && !isNaN(lon)) {
+              map.set(name.toLowerCase(), { name, country, lat, lon });
+            }
+          }
+        }
+        setCityMap(map);
+      } catch (err) {
+        console.error("Failed to parse city CSV data:", err);
+      }
+    };
+    void loadCities();
+  }, []);
   const [hasSearched, setHasSearched] = useState(true);
-  const [shownQuery, setShownQuery] = useState("chloroform");
-  const [shownGlid, setShownGlid] = useState("236");
+  const [shownQuery, setShownQuery] = useState("");
+  const [shownGlid, setShownGlid] = useState("");
   const [searchNonce, setSearchNonce] = useState(0);
-  const [activeQuery, setActiveQuery] = useState("chloroform");
-  const [activeGlid, setActiveGlid] = useState("236");
+  const [activeQuery, setActiveQuery] = useState("");
+  const [activeGlid, setActiveGlid] = useState("");
   const [comparison, setComparison] = useState<{ blSearch: Buylead[]; semanticSearch: Buylead[] }>({
     blSearch: [],
     semanticSearch: [],
@@ -123,6 +179,16 @@ const Index = () => {
     }
   };
 
+  const mcatRankMap = new Map<string, string>();
+  if (sellerInfo?.mcats) {
+    sellerInfo.mcats.forEach((mcatStr) => {
+      const match = mcatStr.match(/^(\d+)([a-zA-Z]+)$/);
+      if (match) {
+        mcatRankMap.set(match[1], match[2]);
+      }
+    });
+  }
+
   return (
     <>
       <Helmet>
@@ -164,11 +230,15 @@ const Index = () => {
             )}
             {sellerLoading ? (
               <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border animate-pulse">
-                Non Retailer: Loading...
+                Retailer: Loading...
               </span>
             ) : (
               <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
-                Non Retailer: {sellerInfo?.non_retailer ?? "—"}
+                {sellerInfo?.non_retailer != null
+                ? ([1, 3, 5, 6].includes(Number(sellerInfo.non_retailer))
+                    ? "Retailer"
+                    : "Non Retailer")
+                : "Retailer: —"}
               </span>
             )}
             {sellerLoading ? (
@@ -292,11 +362,17 @@ const Index = () => {
                   title="Current Buylead Search"
                   results={comparison.blSearch}
                   rankKey="blRank"
+                  sellerInfo={sellerInfo}
+                  mcatRankMap={mcatRankMap}
+                  cityMap={cityMap}
                 />
                 <ResultColumn
                   title="New BL Search"
                   results={comparison.semanticSearch}
                   rankKey="semanticRank"
+                  sellerInfo={sellerInfo}
+                  mcatRankMap={mcatRankMap}
+                  cityMap={cityMap}
                 />
               </div>
             )}
@@ -322,7 +398,7 @@ const Index = () => {
                 Enter a keyword to compare search results
               </h2>
               <p className="text-muted-foreground max-w-md">
-                Type a product keyword like "chloroform" and click search to see
+                Type a product keyword like "sacks" and click search to see
                 how results differ between current BL Search and Semantic Search.
               </p>
             </div>
