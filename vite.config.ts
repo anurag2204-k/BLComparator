@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         rewrite: (proxyPath) => proxyPath.replace(/^\/api\/seller/, "/solr/seller/select"),
       },
+      "/api/related-info": {
+        target: "http://searchtools.intermesh.net:8983",
+        changeOrigin: true,
+        rewrite: (proxyPath) => proxyPath.replace(/^\/api\/related-info/, "/tools/related_info"),
+      },
       "/api/current-buylead": {
         target: "http://blsearch.indiamart.com:8983",
         changeOrigin: true,
@@ -32,6 +37,11 @@ export default defineConfig(({ mode }) => ({
         target: "http://blsearch-db.intermesh.net:8985",
         changeOrigin: true,
         rewrite: (proxyPath) => proxyPath.replace(/^\/api\/seller/, "/solr/seller/select"),
+      },
+      "/api/related-info": {
+        target: "http://searchtools.intermesh.net:8983",
+        changeOrigin: true,
+        rewrite: (proxyPath) => proxyPath.replace(/^\/api\/related-info/, "/tools/related_info"),
       },
       "/api/current-buylead": {
         target: "http://blsearch.indiamart.com:8983",

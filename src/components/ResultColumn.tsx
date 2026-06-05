@@ -10,6 +10,7 @@ interface ResultColumnProps {
   sellerInfo: SellerInfo | null;
   mcatRankMap: Map<string, string>;
   cityMap: Map<string, CityLocation>;
+  queryPmcatId: string | null;
 }
 
 export function ResultColumn({
@@ -19,6 +20,7 @@ export function ResultColumn({
   sellerInfo,
   mcatRankMap,
   cityMap,
+  queryPmcatId,
 }: ResultColumnProps) {
   const sorted = [...results].sort((a, b) => {
     const leftRank = a[rankKey] ?? Number.MAX_SAFE_INTEGER;
@@ -38,6 +40,7 @@ export function ResultColumn({
             sellerInfo={sellerInfo}
             mcatRankMap={mcatRankMap}
             cityMap={cityMap}
+            queryPmcatId={queryPmcatId}
           />
         ))}
         {sorted.length === 0 && (

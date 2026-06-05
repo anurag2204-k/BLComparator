@@ -418,3 +418,36 @@ export async function fetchSellerInfo(glid: string): Promise<SellerInfo> {
   };
 }
 
+export async function fetchRelatedInfo(query: string): Promise<string | null> {
+  const url = `/api/related-info?q=${encodeURIComponent(query)}&source=my.search.lead`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch related info: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const liveMcats = data?.guess?.live_mcats;
+  if (!Array.isArray(liveMcats) || liveMcats.length === 0) {
+    return null;
+  }
+
+  const firstMcat = liveMcats[0];
+  console.log(firstMcat.mcat_accuracy_level);
+  console.log(firstMcat.id);
+  const accuracy = firstMcat?.mcat_accuracy_level;
+  if (accuracy !== "High") {
+    return null;
+  }
+  console.log("here")
+  const pmcatIdList = firstMcat?.pmcatid;
+  if (Array.isArray(pmcatIdList) && pmcatIdList.length > 0 && pmcatIdList[0] !== undefined && pmcatIdList[0] !== null) {
+    return String(pmcatIdList[0]);
+  }
+
+  if (firstMcat?.id !== undefined && firstMcat?.id !== null) {
+    return String(firstMcat.id);
+  }
+
+  return null;
+}
+

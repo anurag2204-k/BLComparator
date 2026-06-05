@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SearchHeader } from "@/components/SearchHeader";
 import { ResultColumn } from "@/components/ResultColumn";
-import { fetchBuyleadComparison, fetchSellerInfo, type Buylead, type FetchLogEntry, type SellerInfo } from "@/data/mockBuyleads";
+import { fetchBuyleadComparison, fetchSellerInfo, fetchRelatedInfo, type Buylead, type FetchLogEntry, type SellerInfo } from "@/data/mockBuyleads";
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, Clock3, Search } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -40,6 +40,7 @@ const Index = () => {
   const [glid, setGlid] = useState("");
   const [sellerInfo, setSellerInfo] = useState<SellerInfo | null>(null);
   const [sellerLoading, setSellerLoading] = useState(false);
+  const [queryPmcatId, setQueryPmcatId] = useState<string | null>(null);
   const [cityMap, setCityMap] = useState<Map<string, CityLocation>>(new Map());
 
   useEffect(() => {
@@ -132,6 +133,18 @@ const Index = () => {
         if (isActive) {
           setSellerInfo(currentSellerInfo);
           setSellerLoading(false);
+        }
+
+        let resolvedPmcatId: string | null = null;
+        try {
+          resolvedPmcatId = await fetchRelatedInfo(activeQuery);
+          console.log("resolvedPmcatId from inside fetchRelatedInfo", resolvedPmcatId);
+        } catch (relatedError) {
+          console.error("Failed to load related info:", relatedError);
+        }
+
+        if (isActive) {
+          setQueryPmcatId(resolvedPmcatId);
         }
 
         const currentUrl = buildSearchUrl(CURRENT_BUYLEAD_URL, activeQuery, activeGlid);
@@ -365,6 +378,7 @@ const Index = () => {
                   sellerInfo={sellerInfo}
                   mcatRankMap={mcatRankMap}
                   cityMap={cityMap}
+                  queryPmcatId={queryPmcatId}
                 />
                 <ResultColumn
                   title="New BL Search"
@@ -373,6 +387,7 @@ const Index = () => {
                   sellerInfo={sellerInfo}
                   mcatRankMap={mcatRankMap}
                   cityMap={cityMap}
+                  queryPmcatId={queryPmcatId}
                 />
               </div>
             )}

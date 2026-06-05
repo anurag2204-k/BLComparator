@@ -8,6 +8,7 @@ interface BuyleadCardProps {
   sellerInfo: SellerInfo | null;
   mcatRankMap: Map<string, string>;
   cityMap: Map<string, CityLocation>;
+  queryPmcatId: string | null;
 }
 
 const COUNTRY_DEFAULTS: Record<string, { lat: number; lon: number }> = {
@@ -73,6 +74,7 @@ export function BuyleadCard({
   sellerInfo,
   mcatRankMap,
   cityMap,
+  queryPmcatId,
 }: BuyleadCardProps) {
   const renderRank = (label: string, rank: number | null, rankClassName: string) => {
     if (rank === null) {
@@ -170,6 +172,9 @@ export function BuyleadCard({
     }
   }
 
+  const isPmcatSame = queryPmcatId !== null && (buylead.pmcatids?.includes(queryPmcatId) || buylead.mcatIds?.includes(queryPmcatId));
+
+
   return (
     <div
       className="bg-card rounded-md shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-150 border border-border overflow-hidden animate-fade-in flex flex-col"
@@ -225,6 +230,15 @@ export function BuyleadCard({
               MCAT Rank: NE
             </span>
           )}
+          {isPmcatSame ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50">
+              PMCAT : Same
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-slate-50 text-slate-600 border border-slate-200 dark:bg-slate-950/30 dark:text-slate-400 dark:border-slate-900/50">
+              PMCAT : Diff
+            </span>
+          )}
           <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border">
             {buylead.retailType}
           </span>
@@ -271,6 +285,36 @@ export function BuyleadCard({
               </span>
               <span className="text-foreground">
                 {attr.value}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/60 text-[11px]">
+          <span className="font-medium text-muted-foreground">
+            pmcatids [{buylead.pmcatids.length}]:
+          </span>
+
+          {buylead.pmcatids.map((pmcatid, index) => (
+            <div
+            key={index}
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:border-border"
+            >
+              <span className="text-muted-foreground">
+                {pmcatid}
+              </span>
+            </div>
+          ))}
+          <span className="font-medium text-muted-foreground">
+            mcatids [{buylead.mcatIds.length}]:
+          </span>
+
+          {buylead.mcatIds.map((mcatId, index) => (
+            <div
+            key={index}
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:border-border"
+            >
+              <span className="text-muted-foreground">
+                {mcatId}
               </span>
             </div>
           ))}
