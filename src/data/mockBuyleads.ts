@@ -112,9 +112,8 @@ function parseDetails(details: string[]): { quantity: string | null; orderValueR
       return;
     }
 
-    if (attributes.length < 2) {
       attributes.push({ label, value });
-    }
+    
   });
 
   return { quantity, orderValueRange, attributes };

@@ -256,19 +256,34 @@ export function BuyleadCard({
           {buylead.requirements ?? ""}
         </p>
 
-        {/* Grid: qty / attr / value */}
-        <div className="grid grid-cols-3 gap-2 text-[11px] pt-1 border-t border-border/60">
+        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/60 text-[11px]">
+          <span className="font-medium text-muted-foreground">
+            IsqDetails [{buylead.attributes.length}]:
+          </span>
+
+          {buylead.attributes.map((attr, index) => (
+            <div
+            key={index}
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:border-border"
+            >
+              <span className="text-muted-foreground">
+                {attr.label}:
+              </span>
+              <span className="text-foreground">
+                {attr.value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Grid: qty /  / value */}
+        <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-border/60">
           <div className="flex items-center gap-1 min-w-0">
             <Package className="w-3 h-3 text-primary flex-shrink-0" />
             <span className="text-muted-foreground">Qty:</span>
             <span className="font-medium text-foreground truncate">{buylead.quantity ?? "—"}</span>
           </div>
-          {buylead.attributes.slice(0, 1).map((attr, index) => (
-            <div key={index} className="flex items-center gap-1 min-w-0">
-              <span className="text-muted-foreground truncate">{attr.label}:</span>
-              <span className="font-medium text-foreground truncate">{attr.value}</span>
-            </div>
-          ))}
+          
           <div className="flex items-center gap-1 min-w-0 justify-end">
             <IndianRupee className="w-3 h-3 text-accent flex-shrink-0" />
             <span className="font-semibold text-foreground truncate">{buylead.orderValueRange ?? "—"}</span>
