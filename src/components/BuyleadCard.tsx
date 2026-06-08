@@ -231,12 +231,21 @@ export function BuyleadCard({
             </span>
           )}
           {isPmcatSame ? (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
               PMCAT : Same
             </span>
           ) : (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-slate-50 text-slate-600 border border-slate-200 dark:bg-slate-950/30 dark:text-slate-400 dark:border-slate-900/50">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
               PMCAT : Diff
+            </span>
+          )}
+          {distance !== null ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border dark:bg-muted/30 dark:text-muted dark:border-border">
+              Distance: {Math.round(distance)} km
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
+              Distance: —
             </span>
           )}
           <span className="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-muted border border-border">
@@ -290,36 +299,6 @@ export function BuyleadCard({
               </span>
               <span className="text-foreground">
                 {attr.value}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/60 text-[11px]">
-          <span className="font-medium text-muted-foreground">
-            pmcatids [{buylead.pmcatids.length}]:
-          </span>
-
-          {buylead.pmcatids.map((pmcatid, index) => (
-            <div
-            key={index}
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:border-border"
-            >
-              <span className="text-muted-foreground">
-                {pmcatid}
-              </span>
-            </div>
-          ))}
-          <span className="font-medium text-muted-foreground">
-            mcatids [{buylead.mcatIds.length}]:
-          </span>
-
-          {buylead.mcatIds.map((mcatId, index) => (
-            <div
-            key={index}
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-medium bg-muted border border-border dark:bg-muted/30 dark:border-border"
-            >
-              <span className="text-muted-foreground">
-                {mcatId}
               </span>
             </div>
           ))}
