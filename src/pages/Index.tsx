@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { SearchHeader } from "@/components/SearchHeader";
 import { ResultColumn } from "@/components/ResultColumn";
 import { fetchBuyleadComparison, fetchSellerInfo, fetchRelatedInfo, type Buylead, type FetchLogEntry, type SellerInfo } from "@/data/mockBuyleads";
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, Clock3, Search } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {HoverCard,HoverCardContent,HoverCardTrigger} from "@/components/ui/hover-card";
 
 const CURRENT_BUYLEAD_URL = import.meta.env.VITE_CURRENT_BUYLEAD_URL ?? "/mock-current-buyleads.json";
 const NEW_BUYLEAD_URL = import.meta.env.VITE_NEW_BUYLEAD_URL ?? "/mock-new-buyleads.json";
@@ -42,6 +43,7 @@ const Index = () => {
   const [sellerLoading, setSellerLoading] = useState(false);
   const [queryPmcatId, setQueryPmcatId] = useState<string | null>(null);
   const [cityMap, setCityMap] = useState<Map<string, CityLocation>>(new Map());
+  const loadedGlidRef = useRef<string>("");
 
   useEffect(() => {
     const loadCities = async () => {
@@ -119,20 +121,39 @@ const Index = () => {
 
     const loadComparison = async () => {
       setIsLoading(true);
-      setSellerLoading(true);
       setError(null);
+
+      // Reset search-specific results
+      setComparison({ blSearch: [], semanticSearch: [] });
+      setFetchLogs([]);
+      setResultSummary({
+        currentTotalResults: null,
+        newTotalResults: null,
+        currentFetchedCount: 0,
+        newFetchedCount: 0,
+      });
+      setQueryPmcatId(null);
+
+      const isNewSeller = activeGlid !== loadedGlidRef.current;
+      if (isNewSeller) {
+        setSellerLoading(true);
+        setSellerInfo(null);
+      }
 
       try {
         let currentSellerInfo: SellerInfo | null = null;
         try {
           currentSellerInfo = await fetchSellerInfo(activeGlid);
+          if (isActive) {
+            setSellerInfo(currentSellerInfo);
+            loadedGlidRef.current = activeGlid;
+          }
         } catch (sellerError) {
           console.error("Failed to load seller details:", sellerError);
-        }
-
-        if (isActive) {
-          setSellerInfo(currentSellerInfo);
-          setSellerLoading(false);
+        } finally {
+          if (isActive && isNewSeller) {
+            setSellerLoading(false);
+          }
         }
 
         let resolvedPmcatId: string | null = null;
@@ -167,7 +188,6 @@ const Index = () => {
       } finally {
         if (isActive) {
           setIsLoading(false);
-          setSellerLoading(false);
         }
       }
     };
@@ -274,6 +294,46 @@ const Index = () => {
               >
                 MCATs: {sellerInfo?.mcats?.length ?? 0}
               </span>
+            )}
+            {sellerLoading ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border animate-pulse">
+                Cities: Loading...
+              </span>
+            ) : (
+              <HoverCard openDelay={100}>
+                <HoverCardTrigger asChild>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border cursor-pointer">
+                    Cities: {sellerInfo?.cities?.length ?? 0}
+                  </span>
+                </HoverCardTrigger>
+
+                <HoverCardContent align="start" side="bottom" className="w-80 shadow-lg">
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-semibold">
+                        Available Cities ({sellerInfo?.cities?.length ?? 0})
+                      </h4>
+                    </div>
+
+                    {sellerInfo?.cities?.length ? (
+                      <div className="flex flex-wrap gap-2 max-h-52 overflow-y-auto">
+                        {sellerInfo.cities.map((city) => (
+                          <span
+                            key={city}
+                            className="rounded-full border px-3 py-1 text-xs font-medium bg-muted"
+                          >
+                            {city}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No cities available
+                      </p>
+                    )}
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             )}
           </div>
         </section>
