@@ -5,6 +5,7 @@ import { fetchBuyleadComparison, fetchSellerInfo, fetchRelatedInfo, type Buylead
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, Clock3, Search } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {HoverCard,HoverCardContent,HoverCardTrigger} from "@/components/ui/hover-card";
 
 const CURRENT_BUYLEAD_URL = import.meta.env.VITE_CURRENT_BUYLEAD_URL ?? "/mock-current-buyleads.json";
 const NEW_BUYLEAD_URL = import.meta.env.VITE_NEW_BUYLEAD_URL ?? "/mock-new-buyleads.json";
@@ -274,6 +275,46 @@ const Index = () => {
               >
                 MCATs: {sellerInfo?.mcats?.length ?? 0}
               </span>
+            )}
+            {sellerLoading ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground border border-border animate-pulse">
+                Cities: Loading...
+              </span>
+            ) : (
+              <HoverCard openDelay={100}>
+                <HoverCardTrigger asChild>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border cursor-pointer">
+                    Cities: {sellerInfo?.cities?.length ?? 0}
+                  </span>
+                </HoverCardTrigger>
+
+                <HoverCardContent align="start" side="bottom" className="w-80 shadow-lg">
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-semibold">
+                        Available Cities ({sellerInfo?.cities?.length ?? 0})
+                      </h4>
+                    </div>
+
+                    {sellerInfo?.cities?.length ? (
+                      <div className="flex flex-wrap gap-2 max-h-52 overflow-y-auto">
+                        {sellerInfo.cities.map((city) => (
+                          <span
+                            key={city}
+                            className="rounded-full border px-3 py-1 text-xs font-medium bg-muted"
+                          >
+                            {city}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No cities available
+                      </p>
+                    )}
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             )}
           </div>
         </section>

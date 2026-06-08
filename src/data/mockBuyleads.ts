@@ -369,6 +369,7 @@ export interface SellerInfo {
   dlp: string | null;
   mcats: string[];
   country: string | null;
+  cities: string[];
 }
 
 export async function fetchSellerInfo(glid: string): Promise<SellerInfo> {
@@ -386,6 +387,7 @@ export async function fetchSellerInfo(glid: string): Promise<SellerInfo> {
   params.set("wt", "json");
 
   const url = `/api/seller?${params.toString()}`;
+  console.log("fetch seller info : ", url);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch seller info: ${response.status} ${response.statusText}`);
@@ -417,11 +419,14 @@ export async function fetchSellerInfo(glid: string): Promise<SellerInfo> {
     dlp: getFieldVal(doc.dlp),
     mcats: getArrayVal(doc.mcats),
     country: getFieldVal(doc.country),
+    cities: getArrayVal(doc.city),
   };
 }
 
 export async function fetchRelatedInfo(query: string): Promise<string | null> {
   const url = `/api/related-info?q=${encodeURIComponent(query)}&source=my.search.lead`;
+  console.log(url);
+  console.log("here");
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch related info: ${response.status} ${response.statusText}`);
