@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { SearchHeader } from "@/components/SearchHeader";
 import { ResultColumn } from "@/components/ResultColumn";
 import { fetchBuyleadComparison, fetchSellerInfo, fetchRelatedInfo, type Buylead, type FetchLogEntry, type SellerInfo } from "@/data/mockBuyleads";
@@ -43,6 +43,7 @@ const Index = () => {
   const [sellerLoading, setSellerLoading] = useState(false);
   const [queryPmcatId, setQueryPmcatId] = useState<string | null>(null);
   const [cityMap, setCityMap] = useState<Map<string, CityLocation>>(new Map());
+  const loadedGlidRef = useRef<string>("");
 
   useEffect(() => {
     const loadCities = async () => {
@@ -120,20 +121,39 @@ const Index = () => {
 
     const loadComparison = async () => {
       setIsLoading(true);
-      setSellerLoading(true);
       setError(null);
+
+      // Reset search-specific results
+      setComparison({ blSearch: [], semanticSearch: [] });
+      setFetchLogs([]);
+      setResultSummary({
+        currentTotalResults: null,
+        newTotalResults: null,
+        currentFetchedCount: 0,
+        newFetchedCount: 0,
+      });
+      setQueryPmcatId(null);
+
+      const isNewSeller = activeGlid !== loadedGlidRef.current;
+      if (isNewSeller) {
+        setSellerLoading(true);
+        setSellerInfo(null);
+      }
 
       try {
         let currentSellerInfo: SellerInfo | null = null;
         try {
           currentSellerInfo = await fetchSellerInfo(activeGlid);
+          if (isActive) {
+            setSellerInfo(currentSellerInfo);
+            loadedGlidRef.current = activeGlid;
+          }
         } catch (sellerError) {
           console.error("Failed to load seller details:", sellerError);
-        }
-
-        if (isActive) {
-          setSellerInfo(currentSellerInfo);
-          setSellerLoading(false);
+        } finally {
+          if (isActive && isNewSeller) {
+            setSellerLoading(false);
+          }
         }
 
         let resolvedPmcatId: string | null = null;
@@ -168,7 +188,6 @@ const Index = () => {
       } finally {
         if (isActive) {
           setIsLoading(false);
-          setSellerLoading(false);
         }
       }
     };
