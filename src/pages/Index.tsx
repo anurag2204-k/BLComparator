@@ -242,7 +242,7 @@ const Index = () => {
         />
 
         {/* Seller Details */}
-        <section className="border-b border-border bg-card/60">
+        <section className="border-b border-border bg-card/60 sticky top-0 z-50 bg-white shadow-lg">
           <div className="px-4 py-2 flex items-center gap-2 flex-wrap text-xs">
             <span className="font-semibold text-foreground mr-1">Seller Details:</span>
             <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-muted text-foreground border border-border">
@@ -307,7 +307,7 @@ const Index = () => {
                   </span>
                 </HoverCardTrigger>
 
-                <HoverCardContent align="start" side="bottom" className="w-80 shadow-lg">
+                <HoverCardContent align="start" side="bottom" className="w-96 shadow-lg">
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-sm font-semibold">

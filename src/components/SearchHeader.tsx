@@ -17,7 +17,7 @@ export function SearchHeader({ searchQuery, onSearchChange, glid, onGlidChange, 
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-primary shadow-md">
+    <header className=" bg-primary shadow-md">
       <div className="px-6 py-3">
         <form
           onSubmit={handleSubmit}
